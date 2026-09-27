@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Axsuz - Smart Photo Gallery</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Splash Screen -->
+<div class="splash-screen" id="splash">
+    <div class="splash-title">
+        <span class="highlight">AXS</span>UZ
+    </div>
+    <div class="splash-line"></div>
+    <div class="splash-subtitle">⚡ NEXT GEN PHOTO SHARING ⚡</div>
+</div>
+
+<!-- Main Content -->
+<div class="landing-content" id="mainContent">
+    <div class="hero-badge">⚡ 𝐀𝐗𝐒𝐔𝐙 𝐏𝐥𝐚𝐭𝐟𝐨𝐫𝐦 𝐯𝟏.𝟎</div>
+    
+    <div style="text-align:center;margin:20px 0;">
+        <img src="images/logo.jpg" alt="Axsuz" class="landing-logo" onerror="this.style.display='none'">
+    </div>
+    
+    <h1 class="landing-title">𝐀𝐗𝐒𝐔𝐙</h1>
+    <p class="landing-subtitle">Your Smart Photo Gallery</p>
+    
+    <div class="landing-badge">💎 Powerful Tools at Your Fingertips 💎</div>
+    
+    <div class="landing-features">
+        <span>⚡ Fast & Reliable</span>
+        <span>🛡️ Secure & Private</span>
+        <span>🌐 Always Online</span>
+    </div>
+    
+    <div class="landing-buttons">
+        <a href="register.html" class="btn-primary">📸 𝐆𝐞𝐭 𝐒𝐭𝐚𝐫𝐭𝐞𝐝</a>
+        <a href="login.html" class="btn-secondary">🔐 𝐋𝐨𝐠𝐢𝐧</a>
+    </div>
+    
+    <div class="landing-stats">
+        <div class="stat-box">
+            <strong>10K+</strong>
+            <span>PHOTOS</span>
+        </div>
+        <div class="stat-box">
+            <strong>1M+</strong>
+            <span>DOWNLOADS</span>
+        </div>
+    </div>
+    
+    <div class="bottom-footer">
+        <p class="powered-by">© ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀxsᴜᴢ ᴏꜰᴄ</p>
+        <p class="server-status">🟢 ꜱᴇʀᴠᴇʀ ɪꜱ ᴏɴʟɪɴᴇ</p>
+        <div class="owner-box">
+            <p>Owner name : <span>Pramod Adithya</span></p>
+            <p>Age : <span>18 years</span></p>
+            <p>Contact : <span>+94704536039</span></p>
+        </div>
+    </div>
+</div>
+
+<script src="js/storage.js"></script>
+<script>
+// Check if logged in
+if (localStorage.getItem('axsuz_user')) {
+    setTimeout(() => {
+        window.location.href = 'home.html';
+    }, 3000);
+} else {
+    setTimeout(() => {
+        document.getElementById('splash').style.display = 'none';
+        document.getElementById('mainContent').style.opacity = '1';
+    }, 3000);
+}
+</script>
+
+</body>
+</html>

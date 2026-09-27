@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload - Axsuz</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar" id="navbar"></nav>
+<main class="container">
+    <div class="form-box">
+        <h2>𝐂𝐫𝐞𝐚𝐭𝐞 𝐏𝐢𝐧</h2>
+        <input type="text" id="pinTitle" placeholder="Pin Title">
+        <textarea id="pinDesc" placeholder="Description" rows="3"></textarea>
+        <input type="file" id="fileInput" accept="image/*">
+        <label for="fileInput" class="file-label">Choose Image</label>
+        <span class="file-name" id="fileName">No file chosen</span>
+        <button onclick="handleUpload()">𝐔𝐩𝐥𝐨𝐚𝐝 𝐏𝐢𝐧</button>
+    </div>
+</main>
+<div id="footer"></div>
+<div class="music-bar" id="musicBar">
+    <div class="music-line">
+        <div class="music-title" id="musicTitle">🎵 𝐀𝐱𝐬𝐮𝐳 𝐌𝐮𝐬𝐢𝐜</div>
+        <div class="music-progress"></div>
+    </div>
+    <button class="music-btn-play" id="musicPlayBtn">▶</button>
+    <button class="music-btn-stop" id="musicStopBtn">■</button>
+</div>
+<nav class="bottom-nav" id="bottomNav"></nav>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script>
+if (!AxsuzStorage.getUser()) window.location.href = 'login.html';
+document.getElementById('fileInput').addEventListener('change', (e) => {
+    const name = e.target.files[0]?.name || 'No file chosen';
+    document.getElementById('fileName').textContent = name;
+    if (e.target.files[0]) document.querySelector('.file-label').innerHTML = '✓ Image Selected';
+});
+async function handleUpload() {
+    const title = document.getElementById('pinTitle').value.trim();
+    const desc = document.getElementById('pinDesc').value.trim();
+    const file = document.getElementById('fileInput').files[0];
+    if (!title || !file) { alert('Title and image required!'); return; }
+    const base64 = await fileToBase64(file);
+    const r = AxsuzStorage.addPin(title, desc, base64);
+    if (r.success) { alert('✅ Pin uploaded!'); window.location.href = 'home.html'; }
+    else alert('❌ ' + r.message);
+}
+</script>
+</body>
+</html>

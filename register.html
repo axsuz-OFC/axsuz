@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register - Axsuz</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar" id="navbar"></nav>
+<main class="container">
+    <div class="form-box">
+        <h2>𝐒𝐢𝐠𝐧 𝐔𝐩</h2>
+        <input type="text" id="regUsername" placeholder="Username">
+        <input type="email" id="regEmail" placeholder="Email">
+        <input type="password" id="regPassword" placeholder="Password">
+        <button onclick="handleRegister()">𝐒𝐢𝐠𝐧 𝐔𝐩</button>
+        <div class="form-link">Already have an account? <a href="login.html">Login</a></div>
+    </div>
+</main>
+<div id="footer"></div>
+<div class="music-bar" id="musicBar">
+    <div class="music-line">
+        <div class="music-title" id="musicTitle">🎵 𝐀𝐱𝐬𝐮𝐳 𝐌𝐮𝐬𝐢𝐜</div>
+        <div class="music-progress"></div>
+    </div>
+    <button class="music-btn-play" id="musicPlayBtn">▶</button>
+    <button class="music-btn-stop" id="musicStopBtn">■</button>
+</div>
+<nav class="bottom-nav" id="bottomNav"></nav>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script>
+function handleRegister() {
+    const u = document.getElementById('regUsername').value.trim();
+    const e = document.getElementById('regEmail').value.trim();
+    const p = document.getElementById('regPassword').value;
+    if (!u || !e || !p) { alert('Fill all fields!'); return; }
+    const r = AxsuzStorage.register(u, e, p);
+    if (r.success) { alert('✅ Account created!'); window.location.href = 'login.html'; }
+    else { alert('❌ ' + r.message); }
+}
+</script>
+</body>
+</html>

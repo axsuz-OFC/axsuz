@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile - Axsuz</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar" id="navbar"></nav>
+<main class="container">
+    <div id="profileInfo"></div>
+    <div class="section-title"><h2>📸 𝐌𝐘 𝐏𝐈𝐍𝐒</h2></div>
+    <div class="grid" id="myPins"></div>
+</main>
+<div id="footer"></div>
+<div class="music-bar" id="musicBar">
+    <div class="music-line">
+        <div class="music-title" id="musicTitle">🎵 𝐀𝐱𝐬𝐮𝐳 𝐌𝐮𝐬𝐢𝐜</div>
+        <div class="music-progress"></div>
+    </div>
+    <button class="music-btn-play" id="musicPlayBtn">▶</button>
+    <button class="music-btn-stop" id="musicStopBtn">■</button>
+</div>
+<nav class="bottom-nav" id="bottomNav"></nav>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const user = AxsuzStorage.getUser();
+    if (!user) { window.location.href = 'login.html'; return; }
+    const pins = AxsuzStorage.getPins().filter(p => p.userId === user.id);
+    const saved = AxsuzStorage.getSaved().length;
+    document.getElementById('profileInfo').innerHTML = `
+        <div style="text-align:center;padding:25px;">
+            <div style="width:85px;height:85px;border-radius:50%;background:linear-gradient(135deg,#ff0055,#ff0000);color:#fff;font-size:38px;font-weight:bold;display:flex;align-items:center;justify-content:center;margin:0 auto 15px;box-shadow:0 0 35px rgba(255,0,85,0.8);">
+                ${user.username.charAt(0).toUpperCase()}
+            </div>
+            <h2 style="color:#ff0055;letter-spacing:2px;">@${user.username}</h2>
+            <p style="color:#666;font-size:12px;margin-top:5px;">${user.email}</p>
+            <div style="display:flex;justify-content:center;gap:40px;margin-top:20px;">
+                <div><strong style="display:block;font-size:22px;color:#fff;">${pins.length}</strong><span style="font-size:10px;color:#ff0055;letter-spacing:2px;">PINS</span></div>
+                <div><strong style="display:block;font-size:22px;color:#fff;">${saved}</strong><span style="font-size:10px;color:#ff0055;letter-spacing:2px;">SAVED</span></div>
+            </div>
+            <div style="margin-top:25px;">
+                <button onclick="changeLogo()" style="padding:10px 20px;background:linear-gradient(135deg,#ff0055,#cc0033);color:#fff;border:none;border-radius:20px;font-weight:bold;letter-spacing:1px;">🖼️ Change Logo</button>
+                <button onclick="resetLogo()" style="padding:10px 20px;background:transparent;color:#ff0055;border:1px solid #ff0055;border-radius:20px;font-weight:bold;margin-left:10px;">↺ Reset</button>
+            </div>
+        </div>
+    `;
+    renderPins('myPins', pins);
+});
+function changeLogo() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const base64 = await fileToBase64(file);
+            AxsuzStorage.saveLogo(base64);
+            alert('✅ Logo updated!');
+            location.reload();
+        }
+    };
+    input.click();
+}
+function resetLogo() {
+    AxsuzStorage.resetLogo();
+    alert('✅ Logo reset!');
+    location.reload();
+}
+</script>
+</body>
+</html>

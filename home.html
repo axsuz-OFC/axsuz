@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home - Axsuz</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar" id="navbar"></nav>
+
+<main class="container">
+    <div style="position:relative;margin-bottom:20px;">
+        <input type="text" id="onlineSearch" placeholder="🔍 Search photos..." 
+            style="width:100%;padding:14px 20px;background:rgba(0,0,0,0.8);border:1px solid rgba(255,0,85,0.5);border-radius:25px;color:#fff;font-size:14px;font-family:'Courier New',monospace;"
+            onkeypress="if(event.key==='Enter') doSearch()">
+    </div>
+    
+    <div class="categories">
+        <button onclick="loadCategory('trending')" class="category-chip active" id="cat-trending">🔥 Trending</button>
+        <button onclick="loadCategory('nature')" class="category-chip" id="cat-nature">🌿 Nature</button>
+        <button onclick="loadCategory('cars')" class="category-chip" id="cat-cars">🚗 Cars</button>
+        <button onclick="loadCategory('anime')" class="category-chip" id="cat-anime">🎌 Anime</button>
+        <button onclick="loadCategory('city')" class="category-chip" id="cat-city">🏙️ City</button>
+        <button onclick="loadCategory('space')" class="category-chip" id="cat-space">🚀 Space</button>
+        <button onclick="loadCategory('wallpaper')" class="category-chip" id="cat-wallpaper">📱 Wallpaper</button>
+        <button onclick="loadCategory('art')" class="category-chip" id="cat-art">🎨 Art</button>
+        <button onclick="loadCategory('food')" class="category-chip" id="cat-food">🍔 Food</button>
+        <button onclick="loadCategory('travel')" class="category-chip" id="cat-travel">✈️ Travel</button>
+    </div>
+    
+    <div class="section-title"><h2>📸 𝐄𝐗𝐏𝐋𝐎𝐑𝐄</h2></div>
+    
+    <p id="loadingText" style="text-align:center;color:#ff0055;font-size:12px;padding:20px;letter-spacing:1px;">⏳ Loading photos...</p>
+    
+    <div class="grid" id="onlineGrid"></div>
+    
+    <div id="loadMoreTrigger" style="height:50px;"></div>
+</main>
+
+<div id="footer"></div>
+
+<div class="music-bar" id="musicBar">
+    <div class="music-line">
+        <div class="music-title" id="musicTitle">🎵 𝐀𝐱𝐬𝐮𝐳 𝐌𝐮𝐬𝐢𝐜</div>
+        <div class="music-progress"></div>
+    </div>
+    <button class="music-btn-play" id="musicPlayBtn">▶</button>
+    <button class="music-btn-stop" id="musicStopBtn">■</button>
+</div>
+
+<nav class="bottom-nav" id="bottomNav"></nav>
+
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pexels.js"></script>
+<script>
+let currentCategory = 'trending';
+let currentPage = 1;
+let isLoading = false;
+let allPhotos = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadCategory('trending');
+    setupInfiniteScroll();
+});
+
+async function loadCategory(cat) {
+    currentCategory = cat;
+    currentPage = 1;
+    allPhotos = [];
+    document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('cat-' + cat)?.classList.add('active');
+    
+    const loading = document.getElementById('loadingText');
+    const grid = document.getElementById('onlineGrid');
+    loading.style.display = 'block';
+    loading.textContent = '⏳ Loading ' + cat + '...';
+    grid.innerHTML = '';
+    
+    let photos = cat === 'trending' ? await PexelsAPI.getTrending(1) : await PexelsAPI.search(cat, 1);
+    
+    if (!photos || photos.length === 0) {
+        loading.textContent = '❌ No photos. Check Pexels API key!';
+        return;
+    }
+    
+    allPhotos = photos;
+    loading.style.display = 'none';
+    renderPhotos(photos, false);
+}
+
+async function doSearch() {
+    const q = document.getElementById('onlineSearch').value.trim();
+    if (!q) return;
+    currentCategory = 'search_' + q;
+    currentPage = 1;
+    allPhotos = [];
+    document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+    
+    const loading = document.getElementById('loadingText');
+    const grid = document.getElementById('onlineGrid');
+    loading.style.display = 'block';
+    loading.textContent = '🔍 Searching "' + q + '"...';
+    grid.innerHTML = '';
+    
+    const photos = await PexelsAPI.search(q, 1);
+    if (!photos || photos.length === 0) { loading.textContent = '❌ No results'; return; }
+    
+    allPhotos = photos;
+    loading.style.display = 'none';
+    renderPhotos(photos, false);
+}
+
+async function loadMore() {
+    if (isLoading) return;
+    isLoading = true;
+    currentPage++;
+    let photos;
+    if (currentCategory.startsWith('search_')) photos = await PexelsAPI.search(currentCategory.replace('search_', ''), currentPage);
+    else if (currentCategory === 'trending') photos = await PexelsAPI.getTrending(currentPage);
+    else photos = await PexelsAPI.search(currentCategory, currentPage);
+    
+    if (photos && photos.length > 0) { allPhotos = allPhotos.concat(photos); renderPhotos(photos, true); }
+    isLoading = false;
+}
+
+function renderPhotos(photos, append = false) {
+    const grid = document.getElementById('onlineGrid');
+    const html = photos.map(photo => `
+        <div class="pin" onclick="window.open('${photo.src.large2x || photo.src.large}', '_blank')">
+            <img src="${photo.src.medium}" alt="" loading="lazy">
+            <div class="pin-actions">
+                <button onclick="event.stopPropagation(); saveOnlinePhoto('${photo.src.medium}', '${(photo.alt || 'Photo').replace(/'/g, '')}', '${photo.photographer.replace(/'/g, '')}')">💾</button>
+            </div>
+            <div class="pin-info">
+                <h4>${(photo.alt || 'Photo').substring(0, 30)}</h4>
+                <small>@${photo.photographer}</small>
+            </div>
+        </div>
+    `).join('');
+    
+    if (append) grid.innerHTML += html;
+    else grid.innerHTML = html;
+}
+
+function saveOnlinePhoto(url, title, author) {
+    if (!AxsuzStorage.getUser()) { alert('Please login first!'); window.location.href = 'login.html'; return; }
+    AxsuzStorage.addPin(title, 'Saved from online • by ' + author, url);
+    alert('✅ Saved to your pins!');
+}
+
+function setupInfiniteScroll() {
+    const trigger = document.getElementById('loadMoreTrigger');
+    if (!trigger) return;
+    const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) loadMore();
+    }, { rootMargin: '200px' });
+    observer.observe(trigger);
+}
+</script>
+
+</body>
+</html>
