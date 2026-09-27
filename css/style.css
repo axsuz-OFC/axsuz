@@ -385,6 +385,42 @@ body::after {
     text-shadow: 0 0 12px rgba(255,0,85,0.9);
 }
 
+/* ===== MODE TOGGLE (Online/Offline) ===== */
+.mode-toggle {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 14px;
+    background: rgba(0,0,0,0.95);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,0,85,0.5);
+    border-radius: 12px;
+    color: #ff0055;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    box-shadow: 0 0 15px rgba(255,0,85,0.3);
+    transition: all 0.3s;
+}
+
+.mode-btn:hover {
+    box-shadow: 0 0 25px rgba(255,0,85,0.6);
+    transform: translateY(-2px);
+}
+
+.mode-btn.active {
+    background: linear-gradient(135deg, #ff0055, #cc0033);
+    color: #fff;
+    border-color: #ff0055;
+    box-shadow: 0 0 25px rgba(255,0,85,0.8);
+}
+
 /* ===== GRID ===== */
 .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 @media (min-width: 600px) { .grid { grid-template-columns: repeat(3, 1fr); } }
@@ -437,7 +473,7 @@ body::after {
 
 .pin-actions button:hover { background: #ff0055; color: #000; }
 
-/* ===== CATEGORIES (Music Bar Style) ===== */
+/* ===== CATEGORIES ===== */
 .categories {
     display: flex;
     gap: 8px;
