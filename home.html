@@ -11,24 +11,17 @@
 <nav class="navbar" id="navbar"></nav>
 
 <main class="container">
-    <!-- Search Bar -->
     <div style="position:relative;margin-bottom:15px;">
         <input type="text" id="onlineSearch" placeholder="🔍 Search photos..." 
             style="width:100%;padding:14px 20px;background:rgba(0,0,0,0.8);border:1px solid rgba(255,0,85,0.5);border-radius:25px;color:#fff;font-size:14px;font-family:'Courier New',monospace;"
             onkeypress="if(event.key==='Enter') doSearch()">
     </div>
     
-    <!-- Online / Offline Toggle -->
     <div class="mode-toggle">
-        <button onclick="switchMode('online')" class="mode-btn active" id="mode-online">
-            🌐 𝐎𝐧𝐥𝐢𝐧𝐞
-        </button>
-        <button onclick="switchMode('offline')" class="mode-btn" id="mode-offline">
-            📱 𝐎𝐟𝐟𝐥𝐢𝐧𝐞
-        </button>
+        <button onclick="switchMode('online')" class="mode-btn active" id="mode-online">🌐 𝐎𝐧𝐥𝐢𝐧𝐞</button>
+        <button onclick="switchMode('offline')" class="mode-btn" id="mode-offline">📱 𝐎𝐟𝐟𝐥𝐢𝐧𝐞</button>
     </div>
     
-    <!-- Online Categories -->
     <div class="categories" id="onlineCategories">
         <button onclick="loadCategory('trending')" class="category-chip active" id="cat-trending">🔥 Trending</button>
         <button onclick="loadCategory('nature')" class="category-chip" id="cat-nature">🌿 Nature</button>
@@ -43,8 +36,6 @@
     </div>
     
     <div class="section-title"><h2 id="sectionTitle">📸 𝐄𝐗𝐏𝐋𝐎𝐑𝐄</h2></div>
-    
-    <p id="loadingText" style="text-align:center;color:#ff0055;font-size:12px;padding:20px;letter-spacing:1px;">⏳ Loading photos...</p>
     
     <div class="grid" id="photosGrid"></div>
     
@@ -79,16 +70,23 @@ document.addEventListener('DOMContentLoaded', () => {
     setupInfiniteScroll();
 });
 
-// ===== ONLINE / OFFLINE SWITCH =====
+// ===== SKELETON LOADING =====
+function showSkeleton(count = 8) {
+    const grid = document.getElementById('photosGrid');
+    let html = '';
+    for (let i = 0; i < count; i++) {
+        html += `<div class="skeleton"></div>`;
+    }
+    grid.innerHTML = html;
+}
+
+// ===== MODE SWITCH =====
 function switchMode(mode) {
     currentMode = mode;
-    
-    // Update buttons
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('mode-' + mode).classList.add('active');
     
     const grid = document.getElementById('photosGrid');
-    const loading = document.getElementById('loadingText');
     const categories = document.getElementById('onlineCategories');
     const sectionTitle = document.getElementById('sectionTitle');
     const searchBar = document.getElementById('onlineSearch');
@@ -99,11 +97,13 @@ function switchMode(mode) {
         categories.style.display = 'flex';
         searchBar.style.display = 'block';
         sectionTitle.textContent = '📸 𝐄𝐗𝐏𝐋𝐎𝐑𝐄';
+        showSkeleton(8);
         loadCategory('trending');
     } else {
         categories.style.display = 'none';
         searchBar.style.display = 'none';
         sectionTitle.textContent = '📱 𝐎𝐅𝐅𝐋𝐈𝐍𝐄 𝐏𝐈𝐍𝐒';
+        showSkeleton(6);
         loadOfflinePins();
     }
 }
@@ -111,34 +111,32 @@ function switchMode(mode) {
 // ===== ONLINE (Pexels) =====
 async function loadCategory(cat) {
     if (currentMode !== 'online') return;
-    
     currentCategory = cat;
     currentPage = 1;
     allPhotos = [];
     document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
     document.getElementById('cat-' + cat)?.classList.add('active');
     
-    const loading = document.getElementById('loadingText');
-    const grid = document.getElementById('photosGrid');
-    loading.style.display = 'block';
-    loading.textContent = '⏳ Loading ' + cat + '...';
-    grid.innerHTML = '';
+    showSkeleton(8);
     
     let photos = cat === 'trending' ? await PexelsAPI.getTrending(1) : await PexelsAPI.search(cat, 1);
     
     if (!photos || photos.length === 0) {
-        loading.textContent = '❌ No photos. Check internet connection!';
+        document.getElementById('photosGrid').innerHTML = `
+            <div class="empty-state">
+                <div class="icon">❌</div>
+                <p>No photos found<br>Check internet connection</p>
+            </div>
+        `;
         return;
     }
     
     allPhotos = photos;
-    loading.style.display = 'none';
     renderOnlinePhotos(photos, false);
 }
 
 async function doSearch() {
     if (currentMode !== 'online') return;
-    
     const q = document.getElementById('onlineSearch').value.trim();
     if (!q) return;
     currentCategory = 'search_' + q;
@@ -146,17 +144,20 @@ async function doSearch() {
     allPhotos = [];
     document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
     
-    const loading = document.getElementById('loadingText');
-    const grid = document.getElementById('photosGrid');
-    loading.style.display = 'block';
-    loading.textContent = '🔍 Searching "' + q + '"...';
-    grid.innerHTML = '';
+    showSkeleton(8);
     
     const photos = await PexelsAPI.search(q, 1);
-    if (!photos || photos.length === 0) { loading.textContent = '❌ No results'; return; }
+    if (!photos || photos.length === 0) {
+        document.getElementById('photosGrid').innerHTML = `
+            <div class="empty-state">
+                <div class="icon">🔍</div>
+                <p>No results for "${q}"</p>
+            </div>
+        `;
+        return;
+    }
     
     allPhotos = photos;
-    loading.style.display = 'none';
     renderOnlinePhotos(photos, false);
 }
 
@@ -177,7 +178,7 @@ function renderOnlinePhotos(photos, append = false) {
     const grid = document.getElementById('photosGrid');
     const html = photos.map(photo => `
         <div class="pin" onclick="window.open('${photo.src.large2x || photo.src.large}', '_blank')">
-            <img src="${photo.src.medium}" alt="" loading="lazy">
+            <img src="${photo.src.medium}" alt="" loading="lazy" onload="this.style.opacity=1" style="opacity:0;transition:opacity 0.3s">
             <div class="pin-actions">
                 <button onclick="event.stopPropagation(); saveOnlinePhoto('${photo.src.medium}', '${(photo.alt || 'Photo').replace(/'/g, '')}', '${photo.photographer.replace(/'/g, '')}')">💾</button>
             </div>
@@ -200,23 +201,24 @@ function saveOnlinePhoto(url, title, author) {
 
 // ===== OFFLINE (localStorage) =====
 function loadOfflinePins() {
-    const loading = document.getElementById('loadingText');
-    loading.style.display = 'none';
+    showSkeleton(6);
     
-    const pins = AxsuzStorage.getPins();
-    
-    if (pins.length === 0) {
-        document.getElementById('photosGrid').innerHTML = `
-            <div class="empty-state">
-                <div class="icon">📱</div>
-                <p>𝐍𝐨 𝐨𝐟𝐟𝐥𝐢𝐧𝐞 𝐩𝐢𝐧𝐬 𝐲𝐞𝐭<br>
-                <a href="upload.html" style="color:#ff0055;">Upload your first pin!</a></p>
-            </div>
-        `;
-        return;
-    }
-    
-    renderOfflinePins(pins);
+    setTimeout(() => {
+        const pins = AxsuzStorage.getPins();
+        
+        if (pins.length === 0) {
+            document.getElementById('photosGrid').innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">📱</div>
+                    <p>𝐍𝐨 𝐨𝐟𝐟𝐥𝐢𝐧𝐞 𝐩𝐢𝐧𝐬 𝐲𝐞𝐭<br>
+                    <a href="upload.html" style="color:#ff0055;">Upload your first pin!</a></p>
+                </div>
+            `;
+            return;
+        }
+        
+        renderOfflinePins(pins);
+    }, 300);
 }
 
 function renderOfflinePins(pins) {
@@ -224,7 +226,7 @@ function renderOfflinePins(pins) {
     const user = AxsuzStorage.getUser();
     grid.innerHTML = pins.map(pin => `
         <div class="pin" onclick="window.open('${pin.image}', '_blank')">
-            <img src="${pin.image}" alt="" loading="lazy" onerror="this.src='images/logo.jpg'">
+            <img src="${pin.image}" alt="" loading="lazy" onerror="this.src='images/logo.jpg'" onload="this.style.opacity=1" style="opacity:0;transition:opacity 0.3s">
             <div class="pin-actions">
                 <button onclick="event.stopPropagation(); likePin(${pin.id})">
                     ${pin.likedBy && user && pin.likedBy.includes(user.id) ? '❤️' : '🤍'} ${pin.likes || 0}
